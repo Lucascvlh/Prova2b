@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mostrar Item</title>
+</head>
+<body>
+    <h2>Lista de Chocolates</h2>
+    <button onclick="back()">Voltar</button>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="chocolatesTableBody"></tbody>
+    </table>
+    <script>
+        function back() {
+                window.location.href = '/home'
+            }
+         function createTableRow(chocolate, index) {
+                const row = document.createElement('tr');
+                const idCell = document.createElement('td');
+                const nomeCell = document.createElement('td');
+                const actionsCell = document.createElement('td');
+
+                idCell.textContent = index;
+                nomeCell.textContent = chocolate;   
+
+                const updateButton = document.createElement('button');
+                updateButton.textContent = 'Atualizar';
+                updateButton.addEventListener('click', () => {
+                    const newName = prompt('Novo nome para ' + chocolate);
+                    if (newName) {
+                        fetch(`/chocolates/${index}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ nome: newName }),
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.message) {
+                                    nomeCell.textContent = newName;
+                                    alert(data.message);
+                                } else {
+                                    alert(data.error);
+                                }
+                            })
+                            .catch(error => console.error(error));
+                    }
+                });
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Excluir';
+                deleteButton.addEventListener('click', () => {
+                    fetch(`/chocolates/${index}`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message) {
+                                row.remove();
+                                alert(data.message);
+                            } else {
+                                alert(data.error);
+                            }
+                        })
+                        .catch(error => console.error(error));
+                });
+
+                actionsCell.appendChild(updateButton);
+                actionsCell.appendChild(deleteButton);
+
+                row.appendChild(idCell);
+                row.appendChild(nomeCell);
+                row.appendChild(actionsCell);
+                return row;
+            }
+
+            fetch('/chocolates')
+                .then(response => response.json())
+                .then(data => {
+                    const chocolatesTableBody = document.getElementById('chocolatesTableBody');
+                    data.chocolateNames.forEach((chocolate, index) => {
+                        chocolatesTableBody.appendChild(createTableRow(chocolate, index));
+                    });
+                })
+                .catch(error => console.error(error));
+    </script>
+</body>
+</html>

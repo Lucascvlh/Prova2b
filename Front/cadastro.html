@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar item</title>
+</head>
+<body>
+    <h1>Cadastrar chocolates</h1>
+    <button onclick="back()">Voltar</button>
+    <form action="/cadastrochocolate" method="post" id="cadastroForm">
+        <label for="nome">Nome: </label>
+        <input type="text" name="nome" id="nome">
+        <button type="submit" onclick="enviarForm(event)">Enviar</button>
+        <p id="mensagem" style="display: none; color: green;"></p>
+    </form>
+    <script>
+        function back(){
+            window.location.href = '/home'
+        }
+        function enviarForm(event) {
+                event.preventDefault(); // Evita o envio padrão do formulário
+                const nome = document.getElementById('nome').value;
+
+                fetch('/cadastrochocolate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ nome }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Exibe a mensagem de sucesso
+                        const mensagem = document.getElementById('mensagem');
+                        mensagem.textContent = `Item ${nome} enviado com sucesso!`;
+                        mensagem.style.display = 'block';
+
+                        // Limpa o campo de entrada
+                        document.getElementById('nome').value = '';
+                    })
+                    .catch(error => console.error(error));
+            }
+    </script>
+</body>
+</html>
